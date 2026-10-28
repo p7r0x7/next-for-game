@@ -1,0 +1,17 @@
+name: "Next"
+
+platforms:
+    arm64-macos:
+        context:
+            flags: ["-O3", "-flto"]
+            linkFlags: ["-flto"]
+
+    x86_64-win32:
+        context:
+            flags: ["-O3", "-flto"]
+            linkFlags: ["-flto"]
+
+    x86_64-linux:
+        context:
+            flags: ["-O3", "-flto"]
+            linkFlags: ["-flto"]
