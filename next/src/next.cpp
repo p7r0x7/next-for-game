@@ -65,19 +65,19 @@ static int Xxh32_Hash(lua_State* L)
 }
 
 /* ============ rand (LuaJIT FFI entry points) ============
- * Addresses are handed to Lua as lightuserdata; lua/rand.lua casts and
+ * Addresses are handed to Lua as lightuserdata; lua/bytekit_rand.lua casts and
  * calls them through the FFI. State structs and output buffers live in Lua FFI memory. */
 extern "C" {
-static void next_sfc32_seed(sfc32_t* s, uint32_t seed)                        { sfc32_seed(s, seed); }
-static void next_sfc32_seed3(sfc32_t* s, uint32_t a, uint32_t b, uint32_t c)  { sfc32_seed3(s, a, b, c); }
-static void next_sfc32_fill_f64(sfc32_t* s, double* o, size_t n)              { sfc32_fill_f64(s, o, n); }
-static void next_sfc32_fill_unit(sfc32_t* s, double* o, size_t n)             { sfc32_fill_unit(s, o, n); }
-static void next_pcg32_seed(pcg32_t* p, uint64_t seed)                        { pcg32_seed(p, seed); }
-static void next_pcg32_fill_f64(pcg32_t* p, double* o, size_t n)              { pcg32_fill_f64(p, o, n); }
-static void next_pcg32_fill_unit(pcg32_t* p, double* o, size_t n)             { pcg32_fill_unit(p, o, n); }
+static void bk_sfc32_seed(sfc32_t* s, uint32_t seed)                        { sfc32_seed(s, seed); }
+static void bk_sfc32_seed3(sfc32_t* s, uint32_t a, uint32_t b, uint32_t c)  { sfc32_seed3(s, a, b, c); }
+static void bk_sfc32_fill_f64(sfc32_t* s, double* o, size_t n)              { sfc32_fill_f64(s, o, n); }
+static void bk_sfc32_fill_unit(sfc32_t* s, double* o, size_t n)             { sfc32_fill_unit(s, o, n); }
+static void bk_pcg32_seed(pcg32_t* p, uint64_t seed)                        { pcg32_seed(p, seed); }
+static void bk_pcg32_fill_f64(pcg32_t* p, double* o, size_t n)              { pcg32_fill_f64(p, o, n); }
+static void bk_pcg32_fill_unit(pcg32_t* p, double* o, size_t n)             { pcg32_fill_unit(p, o, n); }
 }
 
-#define PUSH_FN(name) do { lua_pushlightuserdata(L, (void*)&next_##name); lua_setfield(L, -2, #name); } while (0)
+#define PUSH_FN(name) do { lua_pushlightuserdata(L, (void*)&bk_##name); lua_setfield(L, -2, #name); } while (0)
 
 // rand.ffi_ptrs() -> { sfc32_seed=<ptr>, ... }
 static int Rand_FfiPtrs(lua_State* L)
