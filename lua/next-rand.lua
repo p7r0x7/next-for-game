@@ -1,7 +1,7 @@
 -- LuaJIT-only fast path. Batches are written by C straight into Lua-owned
 -- double[] memory; Lua reads them as plain doubles (JIT-compiled loads, no boxing,
 -- no allocation, no GC). NOTE: FFI arrays are ZERO-based: buf[0] .. buf[n-1].
-local ffi = require "ffi"
+local ffi = package.preload.ffi()
 
 pcall(ffi.cdef, [[
 typedef struct { uint32_t a, b, c, d; } sfc32_t;
