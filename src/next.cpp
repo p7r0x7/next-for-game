@@ -100,6 +100,7 @@ static dmExtension::Result InitializeNext(dmExtension::Params* params)
     luaL_register(L, "zstd",  Zstd_funcs); lua_pop(L, 1);
     luaL_register(L, "xxh32", Xxh_funcs);  lua_pop(L, 1);
     luaL_register(L, "rand",  Rand_funcs); lua_pop(L, 1);
+    dmLogInfo("Next: registered zstd, xxh32, rand (lua_State %p)", (void*)L);
     return dmExtension::RESULT_OK;
 }
 
