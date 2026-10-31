@@ -2,4 +2,4 @@
 title = Next
 
 [library]
-include_dirs = lua, next
+include_dirs = next
