@@ -10,9 +10,9 @@ pcall(ffi.cdef, [[
 local ptrs = rand.ffi_ptrs()
 local entropy_fn = ffi.cast("void(*)(char*, size_t)", ptrs.entropy)
 local sfc_seed_fn = ffi.cast("void(*)(sfc32_t*, const char*)", ptrs.sfc32_seed)
-local sfc_fill_fn = ffi.cast("void(*)(sfc32_t*, double*, size_t)", ptrs.sfc32_doubles)
+local sfc_fill_fn = ffi.cast("void(*)(sfc32_t*, double*, int)", ptrs.sfc32_doubles)
 local pcg_seed_fn = ffi.cast("void(*)(pcg32_t*, const char*)", ptrs.pcg32_seed)
-local pcg_fill_fn = ffi.cast("void(*)(pcg32_t*, double*, size_t)", ptrs.pcg32_doubles)
+local pcg_fill_fn = ffi.cast("void(*)(pcg32_t*, double*, int)", ptrs.pcg32_doubles)
 
 local BUF_SIZE = 1024
 

@@ -81,7 +81,7 @@ static int Zstd_Decompress(lua_State* L) {
 
 // xxh32.hash(str [, seed=0]) -> number (uint32)
 static int Xxh32_Hash(lua_State* L) {
-    int len; const char* s = luaL_checklstring(L, 1, &len);
+    size_t len; const char* s = luaL_checklstring(L, 1, &len);
     uint32_t seed = (uint32_t)luaL_optnumber(L, 2, 0);
     lua_pushnumber(L, (lua_Number)XXH32(s, len, seed));
     return 1;
