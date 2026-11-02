@@ -8,7 +8,7 @@ platforms:
 
     win32:
         context:
-            flags: ["-O3", "-flto"]
+            flags: ["-O3", "-flto", "-lbcrypt"]
             linkFlags: ["-flto"]
 
     linux:

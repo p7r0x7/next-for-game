@@ -1,42 +1,66 @@
--- LuaJIT-only fast path. Batches are written by C straight into Lua-owned
--- double[] memory; Lua reads them as plain doubles (JIT-compiled loads, no boxing,
--- no allocation, no GC). NOTE: FFI arrays are ZERO-based: buf[0] .. buf[n-1].
+local M = {}
+
 local ffi = package.preload.ffi()
 
 pcall(ffi.cdef, [[
-typedef struct { uint32_t a, b, c, d; } sfc32_t;
-typedef struct { uint64_t state; } pcg32_t;
+    typedef struct { uint32_t a, b, c, d; } sfc32_t;
+    typedef struct { uint64_t state; } pcg32_t;
 ]])
 
-local P = rand.ffi_ptrs()
-local cast = ffi.cast
-local sfc_seed   = cast("void(*)(sfc32_t*, uint32_t)", P.sfc32_seed)
-local sfc_seed3  = cast("void(*)(sfc32_t*, uint32_t, uint32_t, uint32_t)", P.sfc32_seed3)
-local sfc_raw    = cast("void(*)(sfc32_t*, double*, size_t)", P.sfc32_fill_f64)
-local sfc_unit   = cast("void(*)(sfc32_t*, double*, size_t)", P.sfc32_fill_unit)
-local pcg_seed   = cast("void(*)(pcg32_t*, uint64_t)", P.pcg32_seed)
-local pcg_raw    = cast("void(*)(pcg32_t*, double*, size_t)", P.pcg32_fill_f64)
-local pcg_unit   = cast("void(*)(pcg32_t*, double*, size_t)", P.pcg32_fill_unit)
+local ptrs = rand.ffi_ptrs()
+local entropy_fn = ffi.cast("void(*)(char*, size_t)", ptrs.entropy)
+local sfc_seed_fn = ffi.cast("void(*)(sfc32_t*, const char*)", ptrs.sfc32_seed)
+local sfc_fill_fn = ffi.cast("void(*)(sfc32_t*, double*, size_t)", ptrs.sfc32_doubles)
+local pcg_seed_fn = ffi.cast("void(*)(pcg32_t*, const char*)", ptrs.pcg32_seed)
+local pcg_fill_fn = ffi.cast("void(*)(pcg32_t*, double*, size_t)", ptrs.pcg32_doubles)
 
-local M = {}
+local BUF_SIZE = 1024
 
--- Allocate a reusable batch buffer (zero-based double array). Do this once.
-function M.buffer(n) return ffi.new("double[?]", n) end
-
--- State objects (1-element arrays so they decay to pointers with no extra work)
-function M.sfc32(seed, s2, s3)
-  local st = ffi.new("sfc32_t[1]")
-  if s2 then sfc_seed3(st, seed, s2, s3) else sfc_seed(st, seed) end
-  return st
-end
-function M.pcg32(seed)
-  local st = ffi.new("pcg32_t[1]")
-  pcg_seed(st, seed)
-  return st
+function M.entropy(n)
+    assert(n <= 256, "entropy(): n must be <= 256")
+    local buf = ffi.new("char[?]", n)
+    entropy_fn(buf, n)
+    return buf
 end
 
--- Fill buf[0..n-1]. "raw" = uint32 values as doubles; "unit" = [0,1) doubles.
-M.sfc32_raw, M.sfc32_unit = sfc_raw, sfc_unit
-M.pcg32_raw, M.pcg32_unit = pcg_raw, pcg_unit
+local pcg_state = ffi.new("pcg32_t[1]")
+local pcg_buf = ffi.new("double[?]", BUF_SIZE)
+local pcg_pos = BUF_SIZE
+local pcg_seeded = false
+
+function M.pcg_seed(seed)
+    if type(seed) == "string" then
+        assert(#seed >= 8, "pcg_seed(): seed needs 8 bytes")
+    end
+    pcg_seed_fn(pcg_state, seed)
+    pcg_pos = BUF_SIZE
+    pcg_seeded = true
+end
+
+function M.pcg_next()
+    assert(pcg_seeded, "pcg_next(): call pcg_seed() to seed first", 2)
+    if pcg_pos >= BUF_SIZE then
+        pcg_fill_fn(pcg_state, pcg_buf, BUF_SIZE)
+        pcg_pos = 0
+    end
+    local v = pcg_buf[pcg_pos]
+    pcg_pos = pcg_pos + 1
+    return v
+end
+
+local sfc_state = ffi.new("sfc32_t[1]")
+local sfc_buf = ffi.new("double[?]", BUF_SIZE)
+local sfc_pos = BUF_SIZE
+sfc_seed_fn(sfc_state, M.entropy(12))
+
+function M.sfc_next()
+    if sfc_pos >= BUF_SIZE then
+        sfc_fill_fn(sfc_state, sfc_buf, BUF_SIZE)
+        sfc_pos = 0
+    end
+    local v = sfc_buf[sfc_pos]
+    sfc_pos = sfc_pos + 1
+    return v
+end
 
 return M
