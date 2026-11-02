@@ -39,7 +39,7 @@ static ZSTD_DCtx* GetDCtx() { if (!g_dctx) g_dctx = ZSTD_createDCtx(); return g_
 // zstd.compress(str [, level=3]) -> str
 static int Zstd_Compress(lua_State* L) {
     size_t len; const char* src = luaL_checklstring(L, 1, &len);
-    if (len > NEXT_MAX_BYTES) return luaL_error(L, "zstd: input exceeds 4 MiB");
+    if (len > NEXT_MAX_BYTES) return luaL_error(L, "zstd: input exceeds 2 MiB");
     int level = (int)luaL_optinteger(L, 2, 3);
 
     ZSTD_CCtx* cc = GetCCtx();
@@ -53,7 +53,7 @@ static int Zstd_Compress(lua_State* L) {
 
     size_t n = ZSTD_compressCCtx(cc, g_cbuf, NEXT_COMPRESS_CAP, src, len, level);
     if (ZSTD_isError(n)) return luaL_error(L, "zstd: %s", ZSTD_getErrorName(n));
-    lua_pushlstring(L, g_cbuf, n);   // Lua copies g_cbuf
+    lua_pushlstring(L, g_cbuf, n);  // Lua copies g_cbuf
     return 1;
 }
 
