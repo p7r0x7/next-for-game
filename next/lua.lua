@@ -8,7 +8,7 @@ pcall(ffi.cdef, [[
 ]])
 
 local ptrs = rand.ffi_ptrs()
-local entropy_fn = ffi.cast("void(*)(char*, size_t)", ptrs.entropy)
+local entropy_fn = ffi.cast("void(*)(char*, int)", ptrs.entropy)
 local sfc_seed_fn = ffi.cast("void(*)(sfc32_t*, const char*)", ptrs.sfc32_seed)
 local sfc_fill_fn = ffi.cast("void(*)(sfc32_t*, double*, int)", ptrs.sfc32_doubles)
 local pcg_seed_fn = ffi.cast("void(*)(pcg32_t*, const char*)", ptrs.pcg32_seed)
@@ -38,7 +38,7 @@ function M.pcg_seed(seed)
 end
 
 function M.pcg_next()
-    assert(pcg_seeded, "pcg_next(): call pcg_seed() to seed first", 2)
+    assert(pcg_seeded, "pcg_next(): call pcg_seed() to seed first")
     if pcg_pos >= BUF_SIZE then
         pcg_fill_fn(pcg_state, pcg_buf, BUF_SIZE)
         pcg_pos = 0
