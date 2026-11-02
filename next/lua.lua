@@ -20,7 +20,7 @@ function M.entropy(n)
     assert(n <= 256, "entropy(): n must be <= 256")
     local buf = ffi.new("char[?]", n)
     entropy_fn(buf, n)
-    return buf
+    return ffi.string(buf, n)
 end
 
 local pcg_state = ffi.new("pcg32_t[1]")
@@ -29,9 +29,8 @@ local pcg_pos = BUF_SIZE
 local pcg_seeded = false
 
 function M.pcg_seed(seed)
-    if type(seed) == "string" then
-        assert(#seed >= 8, "pcg_seed(): seed needs 8 bytes")
-    end
+    assert(type(seed) == "string", "pcg_seed(): seed must be a string")
+    assert(#seed >= 8, "pcg_seed(): seed needs 8 bytes")
     pcg_seed_fn(pcg_state, seed)
     pcg_pos = BUF_SIZE
     pcg_seeded = true

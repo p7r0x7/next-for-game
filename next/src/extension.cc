@@ -25,7 +25,7 @@ static int Rand_FfiPtrs(lua_State* L) {
 
 /* ---------------------------------- zstd --------------------------------- */
 
-#define NEXT_MAX_BYTES (2u << 20)                             // 2 MiB cap, each direction
+#define NEXT_MAX_BYTES (1u << 20)                             // 1 MiB cap, each direction
 #define NEXT_COMPRESS_CAP ZSTD_COMPRESSBOUND(NEXT_MAX_BYTES)  // worst-case compressed size
 
 static ZSTD_CCtx* g_cctx = 0;
@@ -39,7 +39,7 @@ static ZSTD_DCtx* GetDCtx() { if (!g_dctx) g_dctx = ZSTD_createDCtx(); return g_
 // zstd.compress(str [, level=3]) -> str
 static int Zstd_Compress(lua_State* L) {
     size_t len; const char* src = luaL_checklstring(L, 1, &len);
-    if (len > NEXT_MAX_BYTES) return luaL_error(L, "zstd: input exceeds 2 MiB");
+    if (len > NEXT_MAX_BYTES) return luaL_error(L, "zstd: input exceeds cap");
     int level = (int)luaL_optinteger(L, 2, 3);
 
     ZSTD_CCtx* cc = GetCCtx();
