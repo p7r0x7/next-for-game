@@ -65,7 +65,7 @@ static int Zstd_Decompress(lua_State* L) {
     unsigned long long size = ZSTD_getFrameContentSize(src, len);
     if (size == ZSTD_CONTENTSIZE_ERROR) return luaL_error(L, "zstd: not a valid frame");
     if (size == ZSTD_CONTENTSIZE_UNKNOWN) return luaL_error(L, "zstd: frame has no content size");
-    if (size > NEXT_MAX_BYTES) return luaL_error(L, "zstd: output exceeds 4 MiB");
+    if (size > NEXT_MAX_BYTES) return luaL_error(L, "zstd: output exceeds cap");
 
     ZSTD_DCtx* dc = GetDCtx();
     if (!dc) return luaL_error(L, "out of memory");

@@ -15,15 +15,17 @@ extern "C" {
 #endif
 
 /* -------------------------------- entropy -------------------------------- */
-static inline void entropy(char* dst, int n) {
+
+static inline int entropy(char* dst, int n) {
 #ifdef _WIN32
-    BCryptGenRandom(NULL, (PUCHAR)dst, (ULONG)n, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    return BCryptGenRandom(NULL, (PUCHAR)dst, (ULONG)n, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 #else
-    getentropy(dst, (size_t)n);   /* n <= 256 */
+    return getentropy(dst, (size_t)n);  /* n <= 256 */
 #endif
 }
 
 /* ---------------------- pcg32 (XSH-RR, fixed stream) --------------------- */
+
 typedef struct { uint64_t state; } pcg32_t;
 
 #define PCG32_MULT 6364136223846793005ULL
@@ -53,6 +55,7 @@ static inline void pcg32_doubles(pcg32_t* p, double* dst, int n) {
 #endif
 
 /* --------------------------------- sfc32 --------------------------------- */
+
 typedef struct { uint32_t a, b, c, d; } sfc32_t;
 
 static inline uint32_t sfc32_next(sfc32_t* s) {

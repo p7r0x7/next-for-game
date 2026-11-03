@@ -8,7 +8,7 @@ pcall(ffi.cdef, [[
 ]])
 
 local ptrs = rand.ffi_ptrs()
-local entropy_fn = ffi.cast("void(*)(char*, int)", ptrs.entropy)
+local entropy_fn = ffi.cast("int(*)(char*, int)", ptrs.entropy)
 local sfc_seed_fn = ffi.cast("void(*)(sfc32_t*, const char*)", ptrs.sfc32_seed)
 local sfc_fill_fn = ffi.cast("void(*)(sfc32_t*, double*, int)", ptrs.sfc32_doubles)
 local pcg_seed_fn = ffi.cast("void(*)(pcg32_t*, const char*)", ptrs.pcg32_seed)
@@ -19,7 +19,8 @@ local BUF_SIZE = 1024
 function M.entropy(n)
     assert(n <= 256, "entropy(): n must be <= 256")
     local buf = ffi.new("char[?]", n)
-    entropy_fn(buf, n)
+    local rc = entropy_fn(buf, n)
+    assert(rc == 0, "entropy(): failed (" .. rc .. ")")
     return ffi.string(buf, n)
 end
 
