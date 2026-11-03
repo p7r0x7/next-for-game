@@ -1,6 +1,4 @@
 #include <cstddef>
-#define LIB_NAME "Next"
-
 #include <dmsdk/sdk.h>
 #include <stdlib.h>
 
@@ -118,4 +116,4 @@ static dmExtension::Result FinalizeNext(dmExtension::Params*) {
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(Next, LIB_NAME, 0, 0, InitializeNext, 0, 0, FinalizeNext)
+DM_DECLARE_EXTENSION(Next, "Next", 0, 0, InitializeNext, 0, 0, FinalizeNext)
