@@ -9,7 +9,8 @@ platforms:
     win32:
         context:
             flags: ["-O3", "-flto"]
-            linkFlags: ["-flto", "bcrypt.lib"]
+            linkFlags: ["-flto"]
+            libs: ["bcrypt"]
 
     linux:
         context:
