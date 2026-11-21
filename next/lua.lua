@@ -1,6 +1,6 @@
 local M = {}
 
-local ffi = package.preload.ffi()
+local ffi = require "ffi"
 
 pcall(ffi.cdef, [[
     typedef struct { uint32_t a, b, c, d; } sfc32_t;
@@ -16,12 +16,27 @@ local pcg_fill_fn = ffi.cast("void(*)(pcg32_t*, double*, int)", ptrs.pcg32_doubl
 
 local BUF_SIZE = 1024
 
-function M.entropy(n)
+local function entropy(n)
     assert(n <= 256, "entropy(): n must be <= 256")
     local buf = ffi.new("char[?]", n)
     local rc = entropy_fn(buf, n)
     assert(rc == 0, "entropy(): failed (" .. rc .. ")")
     return ffi.string(buf, n)
+end
+
+function M.get_seed()
+    local a, b = rand.sfc_next(), rand.sfc_next()
+
+    return string.char(
+        a % 256,
+        math.floor(a / 256) % 256,
+        math.floor(a / 65536) % 256,
+        math.floor(a / 16777216) % 256,
+        b % 256,
+        math.floor(b / 256) % 256,
+        math.floor(b / 65536) % 256,
+        math.floor(b / 16777216) % 256
+    )
 end
 
 local pcg_state = ffi.new("pcg32_t[1]")
@@ -51,7 +66,7 @@ end
 local sfc_state = ffi.new("sfc32_t[1]")
 local sfc_buf = ffi.new("double[?]", BUF_SIZE)
 local sfc_pos = BUF_SIZE
-sfc_seed_fn(sfc_state, M.entropy(12))
+sfc_seed_fn(sfc_state, entropy(12))
 
 function M.sfc_next()
     if sfc_pos >= BUF_SIZE then
