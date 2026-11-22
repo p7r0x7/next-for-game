@@ -1,6 +1,6 @@
 local M = {}
 
-local ffi = require "ffi"
+local ffi = require "foreign"
 
 pcall(ffi.cdef, [[
     typedef struct { uint32_t a, b, c, d; } sfc32_t;
